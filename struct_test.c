@@ -19,4 +19,9 @@ int main(void) {
 	 STRUCT_ACCESS(test, test_struct, a),
 	 STRUCT_ACCESS(test, test_struct, b),
 	 STRUCT_ACCESS(test, test_struct, c));
+
+  STRUCT_ACCESS(test, test_struct, a)++;
+  
+  printf("a = %d\n",
+	 STRUCT_ACCESS(test, test_struct, a));
 }
