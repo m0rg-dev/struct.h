@@ -43,18 +43,13 @@
 #define EXPAND(...) __VA_ARGS__
 #define WHEN(c) IF(c)(EXPAND, EAT)
 
-#define STRUCT_SIZE_VARS(name, ...) \
-  int CAT4(_size_, name, _, CARCDR(__VA_ARGS)) = sizeof(CAR(__VA_ARGS__)); \
-  WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(SSV_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
-#define SSV_INDIRECT() STRUCT_SIZE_VARS
-
 #define SUM_SIZES(...) \
   sizeof(CAR(__VA_ARGS__)) \
   WHEN(CHECK(CDR(__VA_ARGS__)))(+ OBSTRUCT(SUM_SIZES_INDIRECT)()(CDRCDR(__VA_ARGS__)))
 #define SUM_SIZES_INDIRECT() SUM_SIZES
 
 #define STRUCT_OFFSET_VARS(name, ...) \
-  int CAT4(__offset_, name, _, CARCDR(__VA_ARGS__)) = IF(CHECK(CDR(__VA_ARGS__)))(SUM_SIZES(CDRCDR(__VA_ARGS__)), 0); \
+  const int CAT4(__offset_, name, _, CARCDR(__VA_ARGS__)) = IF(CHECK(CDR(__VA_ARGS__)))(SUM_SIZES(CDRCDR(__VA_ARGS__)), 0); \
   WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(SOV_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
 #define SOV_INDIRECT() STRUCT_OFFSET_VARS
 
@@ -65,7 +60,7 @@
 
 
 #define STRUCT(name, ...) \
-  int __size_##name = EVAL(SUM_SIZES(__VA_ARGS__)); \
+  const int __size_##name = EVAL(SUM_SIZES(__VA_ARGS__)); \
   EVAL(STRUCT_OFFSET_VARS(name, __VA_ARGS__)) \
   EVAL(STRUCT_TYPEDEFS(name, __VA_ARGS__))
 
