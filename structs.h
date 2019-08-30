@@ -15,6 +15,7 @@
 
 #define CAT(a, ...) PRIMITIVE_CAT(a, __VA_ARGS__)
 #define PRIMITIVE_CAT(a, ...) a ## __VA_ARGS__
+#define CAT4(a, b, c, d) CAT(CAT(a, b), CAT(c, d))
 
 #define EMPTY()
 #define DEFER(id) id EMPTY()
@@ -43,7 +44,7 @@
 #define WHEN(c) IF(c)(EXPAND, EAT)
 
 #define STRUCT_SIZE_VARS(name, ...) \
-  int CAT(CAT(CAT(__size_, name), _), CARCDR(__VA_ARGS__)) = sizeof(CAR(__VA_ARGS__)); \
+  int CAT4(_size_, name, _, CARCDR(__VA_ARGS)) = sizeof(CAR(__VA_ARGS__)); \
   WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(SSV_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
 #define SSV_INDIRECT() STRUCT_SIZE_VARS
 
@@ -53,12 +54,12 @@
 #define SUM_SIZES_INDIRECT() SUM_SIZES
 
 #define STRUCT_OFFSET_VARS(name, ...) \
-  int CAT(CAT(CAT(__offset_, name), _), CARCDR(__VA_ARGS__)) = IF(CHECK(CDR(__VA_ARGS__)))(SUM_SIZES(CDRCDR(__VA_ARGS__)), 0); \
+  int CAT4(__offset_, name, _, CARCDR(__VA_ARGS__)) = IF(CHECK(CDR(__VA_ARGS__)))(SUM_SIZES(CDRCDR(__VA_ARGS__)), 0); \
   WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(SOV_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
 #define SOV_INDIRECT() STRUCT_OFFSET_VARS
 
 #define STRUCT_TYPEDEFS(name, ...) \
-  typedef CAR(__VA_ARGS__) CAT(CAT(CAT(__type_, name), _), CARCDR(__VA_ARGS__)); \
+  typedef CAR(__VA_ARGS__) CAT4(__type_, name, _, CARCDR(__VA_ARGS__)); \
   WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(ST_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
 #define ST_INDIRECT() STRUCT_TYPEDEFS
 
@@ -70,5 +71,5 @@
 
 #define STRUCT_SIZEOF(type) __size_##type
 #define STRUCT_MALLOC(type, name) char *name = malloc(STRUCT_SIZEOF(type))
-#define STRUCT_ACCESS(type, name, member) (*((CAT(CAT(CAT(__type_, type), _), member) *) (name + CAT(CAT(CAT(__offset_, type), _), member))))
+#define STRUCT_ACCESS(type, name, member) (*((CAT4(__type_, type, _, member) *) (name + CAT4(__offset_, type, _, member))))
 #endif
