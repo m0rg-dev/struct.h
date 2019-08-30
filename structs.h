@@ -57,20 +57,18 @@
   WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(SOV_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
 #define SOV_INDIRECT() STRUCT_OFFSET_VARS
 
-#define STRUCT_CAST_FUNCS(name, ...) \
-  CAR(__VA_ARGS__) CAT(CAT(CAT(__get_, name), _), CARCDR(__VA_ARGS__))(char*s){return*((CAR(__VA_ARGS__)*)(s+CAT(CAT(CAT(__offset_, name), _), CARCDR(__VA_ARGS__))));} \
-  void CAT(CAT(CAT(__set_, name), _), CARCDR(__VA_ARGS__))(char*s,CAR(__VA_ARGS__) x){*((CAR(__VA_ARGS__)*)(s+CAT(CAT(CAT(__offset_, name), _), CARCDR(__VA_ARGS__))))=x;} \
-  WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(SCF_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
-#define SCF_INDIRECT() STRUCT_CAST_FUNCS
+#define STRUCT_TYPEDEFS(name, ...) \
+  typedef CAR(__VA_ARGS__) CAT(CAT(CAT(__type_, name), _), CARCDR(__VA_ARGS__)); \
+  WHEN(CHECK(CDR(__VA_ARGS__)))(OBSTRUCT(ST_INDIRECT)()(name, CDRCDR(__VA_ARGS__)))
+#define ST_INDIRECT() STRUCT_TYPEDEFS
 
 
 #define STRUCT(name, ...) \
   int __size_##name = EVAL(SUM_SIZES(__VA_ARGS__)); \
   EVAL(STRUCT_OFFSET_VARS(name, __VA_ARGS__)) \
-  EVAL(STRUCT_CAST_FUNCS(name, __VA_ARGS__))
+  EVAL(STRUCT_TYPEDEFS(name, __VA_ARGS__))
 
 #define STRUCT_SIZEOF(type) __size_##type
 #define STRUCT_MALLOC(type, name) char *name = malloc(STRUCT_SIZEOF(type))
-#define STRUCT_GET(type, name, member) (CAT(CAT(CAT(__get_, type), _), member)(name))
-#define STRUCT_SET(type, name, member, value) (CAT(CAT(CAT(__set_, type), _), member)(name, value))
+#define STRUCT_ACCESS(type, name, member) (*((CAT(CAT(CAT(__type_, type), _), member) *) (name + CAT(CAT(CAT(__offset_, type), _), member))))
 #endif
